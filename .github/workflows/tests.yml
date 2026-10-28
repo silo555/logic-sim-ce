@@ -1,0 +1,23 @@
+name: Host tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Test shared engine, UI, renderer and storage adapter
+        run: CC=clang sh tools/test.sh
+      - name: Verify reproducible icon source
+        run: |
+          python3 tools/make_icon.py
+          git diff --exit-code -- icon.png
+      - name: Compile desktop preview backend
+        run: >-
+          clang -std=c11 -Wall -Wextra -Werror -shared -fPIC -Isrc
+          src/logic.c src/app.c src/render.c src/save.c preview/bridge.c
+          -o "$RUNNER_TEMP/logic-preview.so"

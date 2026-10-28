@@ -1,0 +1,8 @@
+bin/
+obj/
+tests/test
+tests/*.dSYM/
+preview/circuit.raw
+preview/circuit.tmp
+__pycache__/
+.DS_Store

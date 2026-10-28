@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>logic sim CE · Sandbox preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0a1019;color:#e2edf6;font:16px/1.5 system-ui,sans-serif}main{max-width:1140px;margin:0 auto;padding:36px 24px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}h1{font-size:32px;letter-spacing:-1px;margin:0}h1 span{color:#4fe193}small,.muted{color:#8ea0b1}.tag{font:12px ui-monospace,monospace;border:1px solid #283746;border-radius:20px;padding:7px 12px;color:#8ea0b1}.layout{display:grid;grid-template-columns:minmax(0,720px) 280px;gap:32px}.screen{border:1px solid #283746;border-radius:12px;padding:16px;background:#182331;box-shadow:0 16px 60px #0004}.screen img{display:block;width:100%;height:auto;image-rendering:pixelated;background:#0c121c;border-radius:2px}.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}button{border:1px solid #304255;border-radius:8px;background:#182331;color:#e2edf6;padding:11px 5px;font:13px system-ui;cursor:pointer}button:hover,button:focus-visible{border-color:#5eb1ff;background:#22364a}button:active{background:#35536c}button b{display:block;color:#bfe0ff}aside h2{font-size:18px;margin:0 0 10px}aside p{margin:0 0 20px}ol{padding-left:22px;color:#becbd7}li{margin-bottom:12px}.signals{display:flex;gap:14px;font-size:13px;margin:18px 0}.one{color:#4fe193}.zero{color:#8ea0b1}.unknown{color:#ffc04b}kbd{border:1px solid #304255;border-radius:4px;padding:1px 5px;font:12px ui-monospace,monospace}footer{font-size:12px;color:#8ea0b1;margin-top:24px}#status{min-height:24px;color:#ffc04b}a{color:#5eb1ff}@media(max-width:850px){.layout{grid-template-columns:1fr}main{padding:20px 14px}.tag{display:none}aside{max-width:650px}}
+</style>
+<main>
+<header><h1><img src="/icon.png" alt="" style="width:32px;height:32px;image-rendering:pixelated;vertical-align:-4px;margin-right:10px">logic sim<span> CE</span></h1><div class="tag">TI-84 PLUS CE · LIVE C PREVIEW</div></header>
+<div class="layout"><section>
+<div class="screen"><img id="screen" src="/screen.png" width="640" height="480" alt="Live Logic CE calculator screen"></div>
+<div class="signals"><span class="one">● 1 / ON</span><span class="zero">● 0 / OFF</span><span class="unknown">● ? / UNKNOWN</span></div>
+<div class="controls">
+<button data-key="3" aria-label="Left"><b>←</b>Left</button><button data-key="1" aria-label="Up"><b>↑</b>Up</button><button data-key="2" aria-label="Down"><b>↓</b>Down</button><button data-key="4" aria-label="Right"><b>→</b>Right</button>
+<button data-key="5"><b>ENTER</b>Place / toggle</button><button data-key="6"><b>2ND · Space</b>Parts</button><button data-key="7"><b>Y= · W</b>Wire</button><button data-key="8"><b>WINDOW · P</b>Input A / B</button>
+<button data-key="9"><b>DEL</b>Erase</button><button data-key="10"><b>TRACE · U</b>Undo</button><button data-key="11"><b>GRAPH · M</b>Menu / save</button><button data-key="12"><b>CLEAR · Esc</b>Cancel / back</button>
+</div><div id="status" role="status"></div>
+</section><aside><h2>A tiny circuit playground.</h2><p class="muted">Place parts, connect outputs to inputs, and watch the signals change.</p>
+<h2>Try the half adder</h2><ol><li>Move to the upper switch and press ENTER to toggle it.</li><li>The upper light is the <b>sum</b>. The lower light is the <b>carry</b>.</li><li>Move down twice to the second switch. With both switches on, sum is 0 and carry is 1.</li></ol>
+<h2>More room to build</h2><p><button data-key="13" style="width:100%"><b>ZOOM · Z</b>Change sandbox size</button></p><p class="muted">Choose 6×4, 9×6, or 12×8. Arrows scroll when you reach the edge. Expanding preserves your circuit.</p><p class="muted">Wires run in the gaps between parts; they never occupy a cell. You can place parts between connected gates.</p><p class="muted">Open the menu for an empty board. ENTER on an empty cell opens parts. To wire: choose the source, press W, move to the target, choose A/B with P, then ENTER.</p>
+<p class="muted">A part can feed many inputs. Feedback loops are rejected. Save from the menu; undo remembers 16 changes.</p>
+</aside></div><footer>The preview runs the same C simulation, UI and pixel drawing as the calculator build. Keypad hardware, archive storage and CE performance still require a calculator test.</footer>
+</main>
+<script>
+let queue=Promise.resolve();let serial=0;
+function key(k){queue=queue.then(async()=>{const r=await fetch('/key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})});if(!r.ok)throw Error('Input failed');const result=await r.json();document.querySelector('#screen').src='/screen.png?v='+(++serial);document.querySelector('#status').textContent=result.effect===1||result.effect===2?'Circuit saved in this desktop preview.':result.effect===3?'The calculator would exit here.':'';}).catch(e=>document.querySelector('#status').textContent=e.message);}
+document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>key(Number(b.dataset.key)));
+const keys={ArrowUp:1,ArrowDown:2,ArrowLeft:3,ArrowRight:4,Enter:5,' ':6,w:7,p:8,Delete:9,Backspace:9,u:10,m:11,Escape:12,z:13};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;const k=keys[e.key]??keys[e.key.toLowerCase()];if(k){e.preventDefault();if(!e.repeat)key(k);}});
+</script></html>
